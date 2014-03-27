@@ -3,7 +3,7 @@ apply plugin: 'base'
 description = 'Spring Integration Groovy DSL'
 
 allprojects {
-  group = 'org.springframework.integration' 
+  group = 'org.springframework.integration'
   repositories {
          maven { url 'https://repo.spring.io/libs-snapshot'}
          maven { url 'https://repo.spring.io/libs-milestone' }
@@ -27,8 +27,8 @@ subprojects { subproject ->
         customizePom(pom, project)
     }
   }
-   
-  
+
+
   task sourcesJar(type: Jar) {
     classifier = 'sources'
     from sourceSets.main.allSource
@@ -48,12 +48,21 @@ subprojects { subproject ->
   // dependencies that are common across all java projects
    dependencies {
 
-    groovy "org.codehaus.groovy:groovy-all:$groovyVersion"
+    compile "org.codehaus.groovy:groovy-all:$groovyVersion"
 
     testCompile "junit:junit-dep:$junitVersion"
     testRuntime "log4j:log4j:$log4jVersion"
     testCompile "org.mockito:mockito-all:$mockitoVersion"
   }
+
+
+	sourceSets.main.groovy.srcDirs = ["src/main/java", "src/main/groovy"]
+
+	// enable all compiler warnings; individual projects may customize further
+	ext.xLintArg = '-Xlint:all,-options'
+	[compileGroovy, compileTestGroovy]*.options*.compilerArgs = [xLintArg]
+
+	compileJava.enabled = compileTestJava.enabled = false
 }
 
 project('spring-integration-dsl-groovy-core') {
@@ -61,7 +70,7 @@ project('spring-integration-dsl-groovy-core') {
   dependencies {
     // dependent libraries
     compile "org.springframework.integration:spring-integration-core:$springIntegrationVersion"
-    testCompile "org.springframework.integration:spring-integration-http:$springIntegrationVersion" 
+    testCompile "org.springframework.integration:spring-integration-http:$springIntegrationVersion"
     testCompile "javax.servlet:javax.servlet-api:$servletApiVersion"
   }
 }
@@ -72,7 +81,7 @@ project('spring-integration-dsl-groovy-jms') {
     compile project(":spring-integration-dsl-groovy-core")
     compile "org.springframework.integration:spring-integration-jms:$springIntegrationVersion"
     compile "javax.jms:jms-api:$jmsApiVersion"
-  
+
     // libraries only needed for test
     testCompile("org.apache.activemq:activemq-broker:$activeMqVersion")
     testCompile("org.apache.activemq:activemq-kahadb-store:$activeMqVersion") {
@@ -104,8 +113,6 @@ project('spring-integration-dsl-groovy-samples') {
      compile project(":spring-integration-dsl-groovy-http")
     compile "log4j:log4j:$log4jVersion"
   }
-  sourceSets.main.groovy.srcDirs = ["src/main/java", "src/main/groovy"]
-  compileJava.enabled = false
 }
 
 project('spring-integration-dsl-groovy-feed') {
@@ -120,7 +127,7 @@ project('spring-integration-dsl-groovy-feed') {
 task 'run-cafe'(type:JavaExec) {
 	description "Runs the cafe example"
 	main = 'org.springframework.integration.samples.cafe.Main'
-	
+
 	classpath = subprojects.find { it.name == 'spring-integration-dsl-groovy-samples' }
 	 .sourceSets.main.runtimeClasspath;
 	workingDir = 'spring-integration-dsl-groovy-samples'
